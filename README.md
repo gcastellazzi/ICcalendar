@@ -9,7 +9,8 @@ Il sito legge i dati aggiornati dalla [pagina ufficiale degli appelli](https://c
 - viste mensile e settimanale;
 - filtri per corso e docente;
 - evidenza visiva degli appelli sovrapposti;
-- esportazione CSV e iCalendar (`.ics`).
+- esportazione CSV e iCalendar (`.ics`);
+- pubblicazione automatica su GitHub Pages dalla cartella `dist`.
 
 ## Sviluppo locale
 
