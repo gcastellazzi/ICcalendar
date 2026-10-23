@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#73151d">
+  <meta name="description" content="Calendario degli appelli del corso di laurea triennale in Ingegneria civile dell'Università di Bologna.">
+  <title>IC Calendar · Calendario esami</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="IC Calendar">
+      <span class="brand-mark" aria-hidden="true">IC</span>
+      <span class="brand-copy"><strong>IC Calendar</strong><small data-i18n="appSubtitle">Calendario esami</small></span>
+    </a>
+    <div class="header-actions">
+      <a class="source-link" href="https://corsi.unibo.it/laurea/IngegneriaCivile/appelli" target="_blank" rel="noreferrer"><span data-i18n="officialSource">Fonte ufficiale</span><span aria-hidden="true">↗</span></a>
+      <button id="refreshButton" class="primary-button" type="button"><span aria-hidden="true">↻</span> <span data-i18n="refresh">Aggiorna</span></button>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="summary" aria-label="Riepilogo">
+      <div class="summary-intro">
+        <p class="eyebrow" data-i18n="eyebrow">Ingegneria civile · Università di Bologna</p>
+        <p class="summary-copy" data-i18n="intro">Gli appelli ufficiali della laurea triennale, organizzati per individuare rapidamente le sovrapposizioni.</p>
+      </div>
+      <dl class="metrics">
+        <div><dt data-i18n="exams">Appelli</dt><dd id="examCount">—</dd></div>
+        <div><dt data-i18n="conflicts">Conflitti</dt><dd id="conflictCount">—</dd></div>
+        <div><dt data-i18n="lastUpdate">Aggiornato</dt><dd id="lastUpdated">—</dd></div>
+      </dl>
+    </section>
+
+    <section class="workspace" aria-labelledby="calendarTitle">
+      <div class="toolbar">
+        <div class="date-navigation">
+          <button id="previousButton" class="icon-button" type="button" aria-label="Periodo precedente">←</button>
+          <button id="todayButton" class="quiet-button" type="button" data-i18n="today">Oggi</button>
+          <button id="nextButton" class="icon-button" type="button" aria-label="Periodo successivo">→</button>
+          <h1 id="calendarTitle">—</h1>
+        </div>
+        <div class="toolbar-right">
+          <div class="view-switch" role="group" aria-label="Vista calendario">
+            <button id="monthViewButton" class="active" type="button" data-i18n="month">Mese</button>
+            <button id="weekViewButton" type="button" data-i18n="week">Settimana</button>
+          </div>
+          <div class="export-group">
+            <button id="csvButton" class="quiet-button" type="button">CSV</button>
+            <button id="icsButton" class="quiet-button" type="button">ICS</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="filters" aria-label="Filtri">
+        <label><span data-i18n="courseFilter">Corso</span><select id="courseFilter"><option value="">Tutti i corsi</option></select></label>
+        <label><span data-i18n="teacherFilter">Docente</span><select id="teacherFilter"><option value="">Tutti i docenti</option></select></label>
+        <button id="clearFiltersButton" class="clear-filter" type="button" data-i18n="clearFilters">Azzera filtri</button>
+        <div id="statusMessage" class="status-panel loading" role="status" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span>
+          <div><strong data-i18n="loadingTitle">Caricamento degli appelli</strong><span data-i18n="loadingBody">Lettura della pagina ufficiale Unibo…</span></div>
+        </div>
+        <p class="duration-note"><span aria-hidden="true">◷</span> <span data-i18n="durationNote">Durata indicativa: 3 ore</span></p>
+      </div>
+
+      <div id="calendarContainer" class="calendar-shell" hidden></div>
+    </section>
+
+    <section id="conflictsSection" class="conflicts-section" aria-labelledby="conflictsTitle" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow" data-i18n="planning">Pianificazione</p><h2 id="conflictsTitle" data-i18n="detectedConflicts">Conflitti rilevati</h2></div>
+        <p data-i18n="conflictExplanation">Gli intervalli sono calcolati usando una durata indicativa di tre ore.</p>
+      </div>
+      <div id="conflictsList" class="conflicts-list"></div>
+    </section>
+  </main>
+
+  <dialog id="eventDialog" class="event-dialog">
+    <div class="dialog-header"><span id="dialogCode" class="course-code"></span><button id="closeDialogButton" class="dialog-close" type="button" aria-label="Chiudi">×</button></div>
+    <h2 id="dialogTitle"></h2><p id="dialogTeacher" class="dialog-teacher"></p>
+    <dl id="dialogDetails" class="dialog-details"></dl>
+    <div class="dialog-footer"><a href="https://corsi.unibo.it/laurea/IngegneriaCivile/appelli" target="_blank" rel="noreferrer"><span data-i18n="openSource">Apri la fonte ufficiale</span> ↗</a></div>
+  </dialog>
+
+  <footer><p data-i18n="disclaimer">Visualizzatore indipendente. I dati ufficiali restano quelli pubblicati dall’Università di Bologna.</p></footer>
+</body>
+</html>
