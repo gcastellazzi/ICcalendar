@@ -33,7 +33,24 @@
     return month < 0 ? null : new Date(+match[3], month, +match[1], +match[4], +match[5]);
   }
 
-  function parseExamPage(html) {
+  function pageUrl(start) {
+    const params = new URLSearchParams();
+    if (start) params.set('b_start:int', String(start));
+    params.set('iccalendar', String(Date.now()));
+    return `${SOURCE_URL}?${params}`;
+  }
+
+  function paginationStarts(html) {
+    const page = new DOMParser().parseFromString(html, 'text/html');
+    const starts = new Set();
+    page.querySelectorAll('nav.pagination a[href]').forEach(link => {
+      const match = (link.getAttribute('href') || '').match(/[?&]b_start:int=(\d+)/);
+      if (match) starts.add(Number(match[1]));
+    });
+    return [...starts];
+  }
+
+  function parseExamPage(html, indexOffset = 0) {
     const page = new DOMParser().parseFromString(html, 'text/html');
     const events = [];
     const fieldNames = {
@@ -60,13 +77,39 @@
         const start = parseDate(fields.when);
         if (!start) return;
         events.push({
-          id:`${code}-${start.getTime()}-${courseIndex}-${examIndex}`, code, course, teacher, start,
+          id:`${code}-${start.getTime()}-${courseIndex + indexOffset}-${examIndex}`, code, course, teacher, start,
           end:new Date(start.getTime() + DURATION_HOURS * 3600000), type:fields.type || '',
           place:fields.place || '', subscriptions:fields.subscriptions || '', notes:fields.notes || ''
         });
       });
     });
-    return events.sort((a,b) => a.start - b.start || a.course.localeCompare(b.course));
+    return events;
+  }
+
+  async function fetchExamPages(signal) {
+    const queue = [0];
+    const seen = new Set(queue);
+    const pages = [];
+    while (queue.length && seen.size <= 8) {
+      const start = queue.shift();
+      const response = await fetch(pageUrl(start), {cache:'no-store', signal});
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const html = await response.text();
+      pages.push(html);
+      paginationStarts(html).forEach(next => {
+        if (!seen.has(next)) {
+          seen.add(next);
+          queue.push(next);
+        }
+      });
+    }
+    const events = pages.flatMap((html, index) => parseExamPage(html, index * 1000));
+    const unique = new Map();
+    events.forEach(event => {
+      const key = `${event.code}|${event.start.getTime()}|${event.type}|${event.place}`;
+      if (!unique.has(key)) unique.set(key, event);
+    });
+    return [...unique.values()].sort((a,b) => a.start - b.start || a.course.localeCompare(b.course));
   }
 
   function findConflicts(events) {
@@ -102,11 +145,9 @@
   async function loadEvents() {
     setStatus('loading');
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 12000);
+    const timeout = window.setTimeout(() => controller.abort(), 20000);
     try {
-      const response = await fetch(`${SOURCE_URL}?iccalendar=${Date.now()}`, {cache:'no-store',signal:controller.signal});
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const events = parseExamPage(await response.text());
+      const events = await fetchExamPages(controller.signal);
       if (!events.length) throw new Error('No exam dates found');
       state.events = events;
       findConflicts(events);
