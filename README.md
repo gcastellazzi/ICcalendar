@@ -2,6 +2,8 @@
 
 Calendario di sola lettura, in italiano, per gli appelli del corso di laurea triennale in Ingegneria civile dell'Università di Bologna.
 
+Il calendario è pubblicato su [gcastellazzi.github.io/ICcalendar](https://gcastellazzi.github.io/ICcalendar/).
+
 Il sito legge i dati aggiornati dalla [pagina ufficiale degli appelli](https://corsi.unibo.it/laurea/IngegneriaCivile/appelli) quando viene aperto o quando si preme **Aggiorna**. Gli intervalli mostrati hanno una durata indicativa di tre ore e servono esclusivamente a rendere visibili le sovrapposizioni.
 
 ## Funzioni
